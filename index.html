@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>売れる流れを、一緒につくる。— 構造設計探究室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #1A1A1A;
+      --dark: #333;
+      --mid: #666;
+      --light: #999;
+      --border: #e0e0e0;
+      --bg: #f8f8f6;
+      --white: #fff;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      color: var(--dark);
+      background: var(--white);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    /* ── 共通 ── */
+    section { padding: 72px 24px; }
+    .inner { max-width: 680px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--light);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-heading {
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 700;
+      color: var(--black);
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
+    .section-body {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.9;
+    }
+    .rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── 1. FV ── */
+    #fv {
+      background: var(--black);
+      color: var(--white);
+      padding: 96px 24px 80px;
+      /* TODO: 背景画像差し替え */
+    }
+    #fv .inner { display: flex; flex-direction: column; gap: 24px; }
+    .fv-catch {
+      font-size: clamp(28px, 7vw, 48px);
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: 0.01em;
+    }
+    .fv-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.8;
+      max-width: 480px;
+    }
+    .fv-cta {
+      display: inline-block;
+      background: var(--white);
+      color: var(--black);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 32px;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      align-self: flex-start;
+      margin-top: 8px;
+    }
+    .fv-cta:hover { background: #eee; }
+
+    /* ── 2. 共感 ── */
+    #pain { background: var(--bg); }
+    .pain-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 32px;
+    }
+    .pain-list li {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: var(--dark);
+      padding-left: 20px;
+      position: relative;
+    }
+    .pain-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--light);
+      border-radius: 50%;
+    }
+    .pain-list li:first-child { border-top: 1px solid var(--border); }
+
+    /* ── 3. サービス ── */
+    #service {}
+    .service-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 32px;
+    }
+    .service-item {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .service-item:first-child { border-top: 1px solid var(--border); }
+    .service-step {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--light);
+      font-weight: 500;
+      padding-top: 4px;
+    }
+    .service-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 6px;
+    }
+    .service-desc {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.8;
+    }
+
+    /* ── 4. 実績 ── */
+    #works { background: var(--bg); }
+    .works-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .work-card {
+      background: var(--white);
+      padding: 20px;
+    }
+    .work-tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--light);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .work-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 4px;
+    }
+    .work-desc { font-size: 13px; color: var(--mid); line-height: 1.7; }
+
+    /* ── 5. 自己紹介 ── */
+    #about {}
+    .about-inner {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 32px;
+    }
+    .about-photo {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+    .about-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 4px;
+    }
+    .about-location {
+      font-size: 12px;
+      color: var(--light);
+      margin-bottom: 14px;
+    }
+    .about-text { font-size: 14px; color: var(--mid); line-height: 1.85; }
+
+    /* ── 6. 進め方 ── */
+    #flow { background: var(--bg); }
+    .flow-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 32px;
+      counter-reset: flow;
+    }
+    .flow-item {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 16px;
+      align-items: start;
+      counter-increment: flow;
+    }
+    .flow-item:first-child { border-top: 1px solid var(--border); }
+    .flow-num {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--border);
+      line-height: 1;
+      padding-top: 4px;
+    }
+    .flow-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 4px;
+    }
+    .flow-desc { font-size: 13px; color: var(--mid); }
+
+    /* ── 7. CTA ── */
+    #cta {
+      background: var(--black);
+      color: var(--white);
+      text-align: center;
+    }
+    .cta-heading {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .cta-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 36px;
+      line-height: 1.8;
+    }
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-primary {
+      display: block;
+      background: var(--white);
+      color: var(--black);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 18px 40px;
+      text-decoration: none;
+      width: 100%;
+      max-width: 320px;
+      letter-spacing: 0.03em;
+    }
+    .btn-secondary {
+      display: block;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      padding: 16px 40px;
+      text-decoration: none;
+      width: 100%;
+      max-width: 320px;
+    }
+    .cta-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 24px;
+      line-height: 1.7;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--light);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 480px) {
+      .works-grid { grid-template-columns: 1fr; }
+      .about-inner { grid-template-columns: 1fr; }
+      .about-photo { width: 80px; height: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 1. FV -->
+<section id="fv">
+  <div class="inner">
+    <p class="section-label">構造設計探究室 / 北海道・当麻町</p>
+    <h1 class="fv-catch">売れる流れを、<br>一緒につくる。</h1>
+    <p class="fv-sub">
+      ECやSNSをやってるのに売上に繋がらない。<br>
+      その詰まりを見つけて、構造から直します。
+    </p>
+    <a href="#cta" class="fv-cta">まずは30分、話を聞かせてください</a>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 2. 共感 -->
+<section id="pain">
+  <div class="inner">
+    <p class="section-label">こんなこと、思っていませんか？</p>
+    <h2 class="section-heading">いい商品・いいサービスがあるのに、<br>届いていない気がする。</h2>
+    <ul class="pain-list">
+      <li>ECやSNSを始めたのに、売上が変わらない</li>
+      <li>発信はしているのに、誰かに届いている実感がない</li>
+      <li>ホームページを作ったけど、問い合わせが来ない</li>
+      <li>何から手をつければいいか、いつも後回しになる</li>
+      <li>改善したいけど、時間も人手も足りない</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 3. サービス -->
+<section id="service">
+  <div class="inner">
+    <p class="section-label">できること</p>
+    <h2 class="section-heading">詰まりを見つけて、<br>売れる流れを整える。</h2>
+    <p class="section-body">
+      デザイン・Web・AIを道具として使いながら、<br>
+      事業の流れを構造から設計・改善します。
+    </p>
+    <div class="service-grid">
+      <div class="service-item">
+        <div class="service-step">STEP 01</div>
+        <div>
+          <div class="service-name">事業導線の診断</div>
+          <div class="service-desc">
+            今の販売・発信・運営の流れを一緒に確認します。<br>
+            どこが詰まっているか、何から直すべきかを整理します。<br>
+            <small style="color:#bbb;">※まず話を聞くだけでも構いません</small>
+          </div>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="service-step">STEP 02</div>
+        <div>
+          <div class="service-name">改善の設計と実装</div>
+          <div class="service-desc">
+            導線の設計・ページ制作・発信の仕組みづくりを行います。<br>
+            作るだけでなく、売れる流れになるまで一緒に考えます。
+          </div>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="service-step">STEP 03</div>
+        <div>
+          <div class="service-name">月次伴走サポート</div>
+          <div class="service-desc">
+            作った仕組みを動かし続けるための月次サポートです。<br>
+            データを見ながら改善を続け、売れる流れを育てます。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 4. 実績 -->
+<section id="works">
+  <div class="inner">
+    <p class="section-label">これまでの仕事</p>
+    <h2 class="section-heading">地域の事業者と、<br>一緒に動いてきました。</h2>
+    <div class="works-grid">
+      <div class="work-card">
+        <div class="work-tag">農業・EC / 進行中</div>
+        <div class="work-name">アサンテファーム</div>
+        <div class="work-desc">北海道当麻町の有機農家。サイト移行・EC導線・LINE運用の設計・改善を担当。</div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">行政・地域 / 制作</div>
+        <div class="work-name">当麻町 地域通貨カード</div>
+        <div class="work-desc">当麻ペイ（デンスケペイ）のカードデザイン・実行委員として参加。</div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">農業 / 制作</div>
+        <div class="work-name">のぼりの城</div>
+        <div class="work-desc">北海道当麻町の農家。フライヤー制作。</div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">行政 / Web制作</div>
+        <div class="work-name">当麻町ホームページ</div>
+        <div class="work-desc">当麻町公式サイト制作への関与。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 5. 自己紹介 -->
+<section id="about">
+  <div class="inner">
+    <p class="section-label">はじめまして</p>
+    <h2 class="section-heading">地元で、一人でやっています。</h2>
+    <div class="about-inner">
+      <img src="img/logo-a2c.png" alt="構造設計探究室 ロゴ" class="about-photo">
+      <div>
+        <div class="about-name">ミズモト アツシ</div>
+        <div class="about-location">北海道・当麻町在住</div>
+        <p class="about-text">
+          デザインとWebと、最近はAIも使いながら、<br>
+          地域の事業者が「売れる流れ」を持てるよう一緒に動いています。<br><br>
+          派手なことは言いません。<br>
+          現場で一緒に考えて、動いて、直していきます。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 6. 進め方 -->
+<section id="flow">
+  <div class="inner">
+    <p class="section-label">ご相談からの流れ</p>
+    <h2 class="section-heading">まず話を聞くところから。</h2>
+    <ol class="flow-list">
+      <li class="flow-item">
+        <div class="flow-num">01</div>
+        <div>
+          <div class="flow-title">まず30分、話を聞かせてください</div>
+          <div class="flow-desc">電話でも対面でも。何が詰まっているか、一緒に確認します。無料です。</div>
+        </div>
+      </li>
+      <li class="flow-item">
+        <div class="flow-num">02</div>
+        <div>
+          <div class="flow-title">詰まりを整理して、提案します</div>
+          <div class="flow-desc">何が問題で、何から直せばいいか。優先順位を整理してお伝えします。</div>
+        </div>
+      </li>
+      <li class="flow-item">
+        <div class="flow-num">03</div>
+        <div>
+          <div class="flow-title">設計して、一緒につくります</div>
+          <div class="flow-desc">導線・ページ・発信の仕組みを設計・制作します。</div>
+        </div>
+      </li>
+      <li class="flow-item">
+        <div class="flow-num">04</div>
+        <div>
+          <div class="flow-title">動かし続けます</div>
+          <div class="flow-desc">公開して終わりではなく、データを見ながら改善を続けます。</div>
+        </div>
+      </li>
+    </ol>
+    <p style="margin-top:20px; font-size:13px; color:var(--light);">※ 料金はご相談時に直接お伝えします。</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 7. CTA -->
+<section id="cta">
+  <div class="inner">
+    <p class="section-label" style="color:rgba(255,255,255,0.4);">Contact</p>
+    <h2 class="cta-heading">まずは30分、<br>話を聞かせてください。</h2>
+    <p class="cta-sub">
+      売上のこと、発信のこと、何から手をつけるか。<br>
+      一緒に確認するだけでも、詰まりが見えることがあります。
+    </p>
+    <div class="cta-buttons">
+      <a href="tel:080-3814-4002" class="btn-primary">電話で相談する</a>
+      <a href="https://line.me/ti/p/~a2c-mizumoto" class="btn-secondary">LINEで相談する</a>
+    </div>
+    <p class="cta-note">
+      北海道・当麻町 / 対応エリア：旭川市・上川地方中心
+    </p>
+  </div>
+</section>
+
+<footer>
+  <p>© 構造設計探究室 / ミズモト アツシ</p>
+</footer>
+
+</body>
+</html>

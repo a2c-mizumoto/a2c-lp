@@ -1,518 +1,1333 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-accent="none" data-density="comfortable" data-numerals="display" data-texture="on">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>売れる流れを、一緒につくる。— 構造設計探究室</title>
+  <meta name="description" content="北海道・当麻町で、農家や小さな事業者の『売れる流れ』を構造から設計・改善します。デザイン・Web・AIを使った地域伴走型の事業設計。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
+    /* ─────────────────────────────
+       Reset
+    ───────────────────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button { font: inherit; background: none; border: 0; color: inherit; cursor: pointer; }
 
+    /* ─────────────────────────────
+       Tokens
+    ───────────────────────────── */
     :root {
-      --black: #1A1A1A;
-      --dark: #333;
-      --mid: #666;
-      --light: #999;
-      --border: #e0e0e0;
-      --bg: #f8f8f6;
-      --white: #fff;
+      --bg:        #f5f3ee;
+      --bg-2:      #efece4;
+      --paper:     #fbfaf6;
+      --ink:       #16140f;
+      --ink-2:     #2d2a23;
+      --mid:       #6b675e;
+      --light:     #aaa498;
+      --hair:      #dcd6c8;
+      --hair-2:    #ebe6d8;
+      --hero-bg:   #16140f;
+      --hero-bg-2: #1f1c14;
+      --hero-fg:   #f0ede4;
+      --hero-mid:  #8c887e;
+      --hero-hair: rgba(240,237,228,0.16);
+
+      --accent:        var(--ink);
+      --accent-on-dark:var(--hero-fg);
+      --accent-tint:   var(--hair-2);
+
+      --font-display: 'Zen Kaku Gothic New', 'Noto Sans JP', system-ui, sans-serif;
+      --font-sans:    'Noto Sans JP', system-ui, -apple-system, sans-serif;
+      --font-num:     'Space Grotesk', 'Zen Kaku Gothic New', system-ui, sans-serif;
+
+      --pad-y: 104px;
+      --pad-x: 24px;
+      --max:   640px;
+
+      --ease:  cubic-bezier(.2,.7,.2,1);
     }
 
+    html[data-accent="indigo"] { --accent: oklch(42% 0.13 255); --accent-on-dark: oklch(72% 0.14 252); --accent-tint: oklch(96% 0.02 252); }
+    html[data-accent="moss"]   { --accent: oklch(42% 0.10 150); --accent-on-dark: oklch(68% 0.12 150); --accent-tint: oklch(96% 0.02 150); }
+    html[data-accent="ochre"]  { --accent: oklch(52% 0.12 70);  --accent-on-dark: oklch(74% 0.14 70);  --accent-tint: oklch(96% 0.03 70); }
+
+    html[data-density="compact"]     { --pad-y: 72px; }
+    html[data-density="comfortable"] { --pad-y: 104px; }
+    html[data-numerals="standard"] .display-num { font-size: 14px !important; font-weight: 500 !important; }
+    html[data-numerals="standard"] .service-step { font-size: 22px !important; }
+    html[data-numerals="standard"] .flow-num     { font-size: 22px !important; }
+
+    /* ─────────────────────────────
+       Base
+    ───────────────────────────── */
+    html { background: var(--bg); }
     body {
-      font-family: 'Noto Sans JP', sans-serif;
-      font-weight: 400;
-      color: var(--dark);
-      background: var(--white);
-      font-size: 16px;
-      line-height: 1.8;
-    }
-
-    /* ── 共通 ── */
-    section { padding: 72px 24px; }
-    .inner { max-width: 680px; margin: 0 auto; }
-
-    .section-label {
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      color: var(--light);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .section-heading {
-      font-size: clamp(22px, 5vw, 30px);
-      font-weight: 700;
-      color: var(--black);
-      line-height: 1.4;
-      margin-bottom: 24px;
-    }
-    .section-body {
+      font-family: var(--font-sans);
+      font-feature-settings: "palt" 1;
+      color: var(--ink-2);
+      background: var(--bg);
       font-size: 15px;
-      color: var(--mid);
-      line-height: 1.9;
+      font-weight: 400;
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    .rule {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0;
+    ::selection { background: var(--ink); color: var(--bg); }
+
+    /* Paper grain overlay */
+    html[data-texture="on"] body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMjAgMjIwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPScyJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nbWF0cml4JyB2YWx1ZXM9JzAgMCAwIDAgMCAgMCAwIDAgMCAwICAwIDAgMCAwIDAgIDAgMCAwIDAuMzUgMCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC42Jy8+PC9zdmc+");
+      background-size: 220px 220px;
+      opacity: 0.08;
+      mix-blend-mode: multiply;
     }
 
-    /* ── 1. FV ── */
-    #fv {
-      background: var(--black);
-      color: var(--white);
-      padding: 96px 24px 80px;
-      /* TODO: 背景画像差し替え */
+    /* ─────────────────────────────
+       Top identifier bar
+    ───────────────────────────── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+      padding: 18px var(--pad-x);
+      border-bottom: 1px solid var(--hair);
+      background: var(--bg);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: var(--mid);
+      text-transform: uppercase;
+      position: relative; z-index: 5;
     }
-    #fv .inner { display: flex; flex-direction: column; gap: 24px; }
-    .fv-catch {
-      font-size: clamp(28px, 7vw, 48px);
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+    .brand-name {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--ink);
+    }
+    .topbar .geo { letter-spacing: 0.22em; font-size: 9.5px; }
+
+    /* ─────────────────────────────
+       Frame / common
+    ───────────────────────────── */
+    section { padding: var(--pad-y) var(--pad-x); position: relative; }
+    .inner  { max-width: var(--max); margin: 0 auto; position: relative; }
+
+    .sec-mark {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 40px;
+      font-family: var(--font-num);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 500;
+      color: var(--mid);
+    }
+    .sec-mark .num { color: var(--ink); font-weight: 500; letter-spacing: 0.05em; }
+    .sec-mark .bar { flex: 0 0 22px; height: 1px; background: var(--ink); }
+    .sec-mark .jp {
+      font-family: var(--font-sans);
+      letter-spacing: 0.18em;
+      color: var(--light);
+      font-size: 10px;
+    }
+
+    .h-section {
+      font-family: var(--font-display);
+      color: var(--ink);
       font-weight: 700;
-      line-height: 1.35;
-      letter-spacing: 0.01em;
+      font-size: clamp(24px, 6.4vw, 30px);
+      line-height: 1.5;
+      letter-spacing: -0.005em;
+      margin-bottom: 22px;
+      text-wrap: pretty;
+    }
+    .lede {
+      color: var(--mid);
+      font-size: 14px;
+      line-height: 1.95;
+      font-weight: 400;
+    }
+
+    /* image placeholder */
+    .img-frame {
+      position: relative;
+      background: var(--bg-2);
+      border: 1px solid var(--hair);
+      border-radius: 4px;
+      overflow: hidden;
+      display: grid; place-items: center;
+      color: var(--light);
+    }
+    .img-frame::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.5), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.025) 100%);
+      pointer-events: none;
+    }
+    .img-frame .stamp {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-num);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--light);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .img-frame .stamp::before,
+    .img-frame .stamp::after {
+      content: ""; width: 18px; height: 1px; background: currentColor; opacity: 0.5;
+    }
+
+    /* ─────────────────────────────
+       01 / Hero
+    ───────────────────────────── */
+    #fv {
+      background: var(--hero-bg);
+      color: var(--hero-fg);
+      padding: 92px var(--pad-x) 92px;
+      overflow: hidden;
+      position: relative;
+    }
+    #fv::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(140% 100% at 70% 0%, var(--hero-bg-2), var(--hero-bg) 65%);
+      pointer-events: none;
+    }
+    #fv .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(240,237,228,0.10) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: 0 0;
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 75%);
+              mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 75%);
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    #fv .inner { z-index: 1; }
+    #fv .sec-mark { color: var(--hero-mid); }
+    #fv .sec-mark .num { color: var(--hero-fg); }
+    #fv .sec-mark .bar { background: var(--hero-fg); opacity: 0.5; }
+    #fv .sec-mark .jp  { color: var(--hero-mid); }
+
+    .fv-eyebrow {
+      font-family: var(--font-num);
+      font-size: 10.5px;
+      letter-spacing: 0.28em;
+      color: var(--hero-mid);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .fv-eyebrow::before {
+      content: ""; width: 26px; height: 1px; background: var(--hero-mid);
+    }
+    .fv-catch {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(36px, 10vw, 56px);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      color: var(--hero-fg);
+      margin-bottom: 30px;
+      text-wrap: pretty;
+    }
+    em.mark {
+      font-style: normal;
+      position: relative;
+      display: inline-block;
+    }
+    em.mark::after {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: -0.1em;
+      height: 2px;
+      background: currentColor;
+      opacity: 0.9;
     }
     .fv-sub {
-      font-size: 15px;
-      color: rgba(255,255,255,0.65);
-      line-height: 1.8;
-      max-width: 480px;
+      font-size: 14.5px;
+      color: var(--hero-mid);
+      line-height: 1.95;
+      max-width: 440px;
+      margin-bottom: 44px;
     }
-    .fv-cta {
-      display: inline-block;
-      background: var(--white);
-      color: var(--black);
-      font-size: 15px;
-      font-weight: 700;
-      padding: 16px 32px;
-      text-decoration: none;
-      letter-spacing: 0.03em;
-      align-self: flex-start;
-      margin-top: 8px;
-    }
-    .fv-cta:hover { background: #eee; }
 
-    /* ── 2. 共感 ── */
+    .fv-cta {
+      display: inline-flex; align-items: center;
+      gap: 18px;
+      padding: 18px 24px;
+      background: var(--hero-fg);
+      color: var(--hero-bg);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      border: 1px solid var(--hero-fg);
+      transition: transform .3s var(--ease), background .3s var(--ease), color .3s var(--ease);
+    }
+    .fv-cta:hover {
+      transform: translateY(-1px);
+      background: transparent;
+      color: var(--hero-fg);
+    }
+    .fv-cta .arrow {
+      font-family: var(--font-num);
+      font-weight: 300; font-size: 20px;
+      line-height: 1; letter-spacing: 0;
+      transition: transform .3s var(--ease);
+    }
+    .fv-cta:hover .arrow { transform: translateX(4px); }
+
+    .fv-meta {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 18px 22px;
+      padding-top: 28px;
+      margin-top: 44px;
+      border-top: 1px solid var(--hero-hair);
+    }
+    .fv-meta dt {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      color: var(--hero-mid);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .fv-meta dd {
+      font-size: 12.5px;
+      color: var(--hero-fg);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─────────────────────────────
+       Trusted by — slim strip
+    ───────────────────────────── */
+    .trust {
+      background: var(--bg);
+      padding: 36px var(--pad-x) 36px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .trust .inner {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 18px;
+    }
+    .trust-label {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.26em;
+      color: var(--mid);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .trust-label::before,
+    .trust-label::after {
+      content: ""; width: 18px; height: 1px; background: var(--hair);
+    }
+    .trust-row {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 14px 24px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--light);
+    }
+    .trust-row span { white-space: nowrap; }
+
+    /* ─────────────────────────────
+       02 / Pain
+    ───────────────────────────── */
     #pain { background: var(--bg); }
     .pain-list {
       list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      margin-top: 32px;
+      margin-top: 36px;
+      border-top: 1px solid var(--hair);
     }
     .pain-list li {
-      padding: 18px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 15px;
-      color: var(--dark);
-      padding-left: 20px;
-      position: relative;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--hair);
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--ink-2);
     }
-    .pain-list li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 6px;
-      height: 6px;
-      background: var(--light);
-      border-radius: 50%;
+    .pain-list .display-num {
+      font-family: var(--font-num);
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-feature-settings: "tnum" 1;
     }
-    .pain-list li:first-child { border-top: 1px solid var(--border); }
 
-    /* ── 3. サービス ── */
-    #service {}
-    .service-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      margin-top: 32px;
+    /* ─────────────────────────────
+       Workspace photo — full-bleed band
+    ───────────────────────────── */
+    .scene {
+      background: var(--bg);
+      padding: 0 var(--pad-x) var(--pad-y);
+      margin-top: calc(var(--pad-y) * -0.4);
+    }
+    .scene .inner { max-width: 800px; }
+    .scene .img-frame {
+      width: 100%;
+      aspect-ratio: 16 / 11;
+    }
+    .scene-caption {
+      display: flex; justify-content: space-between;
+      align-items: baseline;
+      margin-top: 14px;
+      gap: 14px;
+      font-family: var(--font-num);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      white-space: nowrap;
+    }
+    .scene-caption > span { overflow: hidden; text-overflow: ellipsis; }
+    .scene-caption b {
+      font-weight: 500;
+      color: var(--ink);
+      font-family: var(--font-sans);
+      letter-spacing: 0.08em;
+    }
+    @media (max-width: 420px) {
+      .scene-caption { font-size: 9px; letter-spacing: 0.12em; }
+    }
+
+    /* ─────────────────────────────
+       03 / Service
+    ───────────────────────────── */
+    #service { background: var(--paper); border-top: 1px solid var(--hair); }
+    .service-list {
+      margin-top: 40px;
+      border-top: 1px solid var(--hair);
     }
     .service-item {
-      padding: 28px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 36px 0;
+      border-bottom: 1px solid var(--hair);
       display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 20px;
+      grid-template-columns: 84px 1fr;
+      gap: 18px;
       align-items: start;
     }
-    .service-item:first-child { border-top: 1px solid var(--border); }
+    .service-step-block { display: flex; flex-direction: column; gap: 12px; }
     .service-step {
-      font-size: 11px;
-      letter-spacing: 0.1em;
+      font-family: var(--font-num);
+      font-size: 46px;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      font-feature-settings: "tnum" 1;
+    }
+    .service-step-label {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
       color: var(--light);
       font-weight: 500;
-      padding-top: 4px;
+      text-transform: uppercase;
+    }
+    .service-icon {
+      width: 24px; height: 24px;
+      color: var(--ink);
+      opacity: 0.75;
     }
     .service-name {
-      font-size: 17px;
+      font-family: var(--font-display);
+      font-size: 18px;
       font-weight: 700;
-      color: var(--black);
-      margin-bottom: 6px;
+      color: var(--ink);
+      margin-bottom: 10px;
+      letter-spacing: -0.005em;
     }
     .service-desc {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--mid);
-      line-height: 1.8;
+      line-height: 1.95;
+    }
+    .service-desc .note {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      padding: 6px 0 6px 12px;
+      border-left: 2px solid var(--accent);
+      font-weight: 500;
     }
 
-    /* ── 4. 実績 ── */
+    /* ─────────────────────────────
+       04 / Works
+    ───────────────────────────── */
     #works { background: var(--bg); }
     .works-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 32px;
+      gap: 1px;
+      margin-top: 36px;
+      background: var(--hair);
+      border: 1px solid var(--hair);
     }
     .work-card {
-      background: var(--white);
-      padding: 20px;
+      background: var(--paper);
+      padding: 0;
+      display: flex; flex-direction: column;
+      min-height: 240px;
     }
-    .work-tag {
-      font-size: 10px;
-      letter-spacing: 0.1em;
+    .work-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--hair);
+      position: relative;
+      overflow: hidden;
+    }
+    .work-thumb::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(80% 60% at 50% 0%, rgba(255,255,255,0.5), transparent 70%),
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.03) 100%);
+    }
+    .work-thumb .stamp {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-num);
+      font-size: 9px;
+      letter-spacing: 0.24em;
       color: var(--light);
       text-transform: uppercase;
-      margin-bottom: 8px;
+    }
+    .work-body {
+      padding: 16px 16px 18px;
+      display: flex; flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .work-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px;
+    }
+    .work-tag {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      color: var(--mid);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .work-year {
+      font-family: var(--font-num);
+      font-size: 12px;
+      color: var(--light);
+      letter-spacing: 0.04em;
+      font-weight: 400;
     }
     .work-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--black);
-      margin-bottom: 4px;
-    }
-    .work-desc { font-size: 13px; color: var(--mid); line-height: 1.7; }
-
-    /* ── 5. 自己紹介 ── */
-    #about {}
-    .about-inner {
-      display: grid;
-      grid-template-columns: 100px 1fr;
-      gap: 28px;
-      align-items: start;
-      margin-top: 32px;
-    }
-    .about-photo {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-    }
-    .about-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--black);
-      margin-bottom: 4px;
-    }
-    .about-location {
-      font-size: 12px;
-      color: var(--light);
-      margin-bottom: 14px;
-    }
-    .about-text { font-size: 14px; color: var(--mid); line-height: 1.85; }
-
-    /* ── 6. 進め方 ── */
-    #flow { background: var(--bg); }
-    .flow-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      margin-top: 32px;
-      counter-reset: flow;
-    }
-    .flow-item {
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: 36px 1fr;
-      gap: 16px;
-      align-items: start;
-      counter-increment: flow;
-    }
-    .flow-item:first-child { border-top: 1px solid var(--border); }
-    .flow-num {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--border);
-      line-height: 1;
-      padding-top: 4px;
-    }
-    .flow-title {
+      font-family: var(--font-display);
       font-size: 15px;
       font-weight: 700;
-      color: var(--black);
-      margin-bottom: 4px;
+      color: var(--ink);
+      line-height: 1.4;
+      letter-spacing: -0.005em;
     }
-    .flow-desc { font-size: 13px; color: var(--mid); }
-
-    /* ── 7. CTA ── */
-    #cta {
-      background: var(--black);
-      color: var(--white);
-      text-align: center;
-    }
-    .cta-heading {
-      font-size: clamp(20px, 4vw, 26px);
-      font-weight: 700;
-      line-height: 1.5;
-      margin-bottom: 16px;
-    }
-    .cta-sub {
-      font-size: 14px;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 36px;
-      line-height: 1.8;
-    }
-    .cta-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-    }
-    .btn-primary {
-      display: block;
-      background: var(--white);
-      color: var(--black);
-      font-size: 15px;
-      font-weight: 700;
-      padding: 18px 40px;
-      text-decoration: none;
-      width: 100%;
-      max-width: 320px;
-      letter-spacing: 0.03em;
-    }
-    .btn-secondary {
-      display: block;
-      border: 1px solid rgba(255,255,255,0.3);
-      color: rgba(255,255,255,0.8);
-      font-size: 14px;
-      padding: 16px 40px;
-      text-decoration: none;
-      width: 100%;
-      max-width: 320px;
-    }
-    .cta-note {
-      font-size: 12px;
-      color: rgba(255,255,255,0.35);
-      margin-top: 24px;
+    .work-desc {
+      font-size: 11.5px;
+      color: var(--mid);
       line-height: 1.7;
     }
-
-    /* ── Footer ── */
-    footer {
-      padding: 24px;
+    .work-status {
+      margin-top: auto;
+      font-family: var(--font-num);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--ink);
+      font-weight: 500;
+      text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .work-status::before {
+      content: "";
+      width: 5px; height: 5px;
+      background: var(--ink);
+      border-radius: 50%;
+    }
+    .work-status.done { color: var(--light); }
+    .work-status.done::before { background: var(--light); }
+    .works-note {
+      margin-top: 24px;
+      font-size: 11.5px;
+      color: var(--mid);
       text-align: center;
-      font-size: 12px;
-      color: var(--light);
-      border-top: 1px solid var(--border);
+      letter-spacing: 0.08em;
+      font-family: var(--font-num);
+      text-transform: uppercase;
     }
 
-    @media (max-width: 480px) {
-      .works-grid { grid-template-columns: 1fr; }
-      .about-inner { grid-template-columns: 1fr; }
-      .about-photo { width: 80px; height: 80px; }
+    /* ─────────────────────────────
+       05 / About
+    ───────────────────────────── */
+    #about { background: var(--paper); border-top: 1px solid var(--hair); }
+    .about-top {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 22px;
+      align-items: center;
+      margin-top: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--hair);
     }
+    .portrait {
+      width: 112px; height: 112px;
+      position: relative;
+      background: var(--bg-2);
+      border: 1px solid var(--hair);
+      overflow: hidden;
+    }
+    .portrait::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(80% 60% at 50% 0%, rgba(255,255,255,0.5), transparent 70%),
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.04) 100%);
+    }
+    .portrait .stamp {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-num);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--light);
+      text-transform: uppercase;
+    }
+    .about-name {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+      letter-spacing: -0.005em;
+    }
+    .about-romaji {
+      font-family: var(--font-num);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--light);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .about-location {
+      font-size: 11.5px;
+      color: var(--mid);
+      letter-spacing: 0.06em;
+    }
+    .about-text {
+      margin-top: 28px;
+      font-size: 14px;
+      color: var(--ink-2);
+      line-height: 2.0;
+    }
+    .about-text p + p { margin-top: 1.0em; }
+    .about-sig {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--hair);
+      font-family: var(--font-num);
+      font-size: 10.5px;
+      color: var(--mid);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────
+       Voice — testimonial
+    ───────────────────────────── */
+    #voice {
+      background: var(--bg-2);
+      border-top: 1px solid var(--hair);
+      border-bottom: 1px solid var(--hair);
+    }
+    .voice-card {
+      margin-top: 36px;
+      background: var(--paper);
+      border: 1px solid var(--hair);
+      padding: 36px 26px 30px;
+      position: relative;
+    }
+    .voice-card::before {
+      content: "\201C";
+      position: absolute;
+      top: -22px; left: 22px;
+      font-family: var(--font-num);
+      font-size: 96px;
+      line-height: 1;
+      font-weight: 300;
+      color: var(--accent);
+      opacity: 0.18;
+    }
+    .voice-quote {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 18px;
+      line-height: 1.85;
+      color: var(--ink);
+      letter-spacing: 0.01em;
+      text-wrap: pretty;
+    }
+    .voice-attr {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--hair);
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .voice-avatar {
+      width: 44px; height: 44px;
+      background: var(--bg-2);
+      border: 1px solid var(--hair);
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    .voice-avatar::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(80% 60% at 50% 0%, rgba(255,255,255,0.5), transparent 70%);
+    }
+    .voice-meta-name {
+      font-family: var(--font-display);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .voice-meta-role {
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+    }
+
+    /* ─────────────────────────────
+       06 / Flow
+    ───────────────────────────── */
+    #flow { background: var(--bg); }
+    .flow-list { list-style: none; margin-top: 36px; }
+    .flow-item {
+      padding: 26px 0;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: start;
+      border-bottom: 1px solid var(--hair);
+    }
+    .flow-item:first-child { border-top: 1px solid var(--hair); }
+    .flow-num {
+      font-family: var(--font-num);
+      font-size: 34px;
+      line-height: 0.95;
+      font-weight: 300;
+      color: var(--ink);
+      letter-spacing: -0.03em;
+      font-feature-settings: "tnum" 1;
+    }
+    .flow-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+      margin-bottom: 8px;
+    }
+    .flow-desc { font-size: 13px; color: var(--mid); line-height: 1.85; }
+    .flow-desc em {
+      font-style: normal;
+      color: var(--ink);
+      font-weight: 700;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 1px;
+    }
+    .flow-meta {
+      margin-top: 32px;
+      padding: 22px;
+      background: var(--paper);
+      border: 1px solid var(--hair);
+      font-size: 12.5px;
+      color: var(--ink-2);
+      line-height: 1.9;
+    }
+    .flow-meta strong {
+      font-family: var(--font-display);
+      color: var(--ink);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    /* ─────────────────────────────
+       07 / CTA
+    ───────────────────────────── */
+    #cta {
+      background: var(--hero-bg);
+      color: var(--hero-fg);
+      padding: 96px var(--pad-x) 88px;
+      overflow: hidden;
+      position: relative;
+    }
+    #cta::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(140% 100% at 30% 100%, var(--hero-bg-2), var(--hero-bg) 65%);
+      pointer-events: none;
+    }
+    #cta .inner { position: relative; z-index: 1; }
+    #cta .sec-mark { color: var(--hero-mid); }
+    #cta .sec-mark .num { color: var(--hero-fg); }
+    #cta .sec-mark .bar { background: var(--hero-fg); opacity: 0.5; }
+    #cta .sec-mark .jp  { color: var(--hero-mid); }
+
+    .cta-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--hero-fg);
+      font-size: clamp(28px, 7.4vw, 38px);
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+      margin-bottom: 22px;
+    }
+    .cta-sub {
+      font-size: 13.5px;
+      color: var(--hero-mid);
+      line-height: 1.95;
+      margin-bottom: 40px;
+    }
+    .cta-buttons { display: flex; flex-direction: column; gap: 14px; }
+    .btn {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px;
+      padding: 22px 24px;
+      text-decoration: none;
+      transition: opacity .25s var(--ease), background .25s var(--ease), transform .3s var(--ease);
+    }
+    .btn .label-row { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .btn .label-small {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      font-weight: 500;
+      opacity: 0.55;
+      text-transform: uppercase;
+    }
+    .btn .label-main {
+      font-family: var(--font-num);
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .btn .arrow {
+      font-family: var(--font-num);
+      font-size: 22px; font-weight: 300; line-height: 1;
+      opacity: 0.5;
+      transition: transform .3s var(--ease);
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:hover .arrow { transform: translate(2px, -2px); }
+    .btn-primary { background: var(--hero-fg); color: var(--hero-bg); }
+    .btn-primary .arrow { opacity: 0.7; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--hero-fg);
+      border: 1px solid var(--hero-hair);
+    }
+    .btn-secondary .label-main { font-weight: 400; font-size: 15px; }
+    .btn-secondary:hover { background: rgba(240,237,228,0.05); }
+
+    .cta-note {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--hero-hair);
+      font-family: var(--font-num);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--hero-mid);
+      line-height: 2;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────
+       Footer
+    ───────────────────────────── */
+    footer {
+      padding: 44px var(--pad-x) 56px;
+      background: var(--bg);
+      color: var(--mid);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      line-height: 1.95;
+      border-top: 1px solid var(--hair);
+    }
+    .foot-grid {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    .foot-item dt {
+      font-family: var(--font-num);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      color: var(--light);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .foot-item dd {
+      color: var(--ink);
+      font-size: 12.5px;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+    }
+    .foot-copy {
+      max-width: var(--max);
+      margin: 36px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--hair);
+      display: flex; justify-content: space-between; gap: 12px;
+      font-family: var(--font-num);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--light);
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────
+       Larger screens
+    ───────────────────────────── */
+    @media (min-width: 720px) {
+      :root { --pad-y: 140px; --pad-x: 36px; --max: 720px; }
+      body { font-size: 16px; }
+      .scene .inner { max-width: 880px; }
+      .about-top { grid-template-columns: 140px 1fr; }
+      .portrait { width: 140px; height: 140px; }
+    }
+    @media (max-width: 380px) {
+      .about-top { grid-template-columns: 80px 1fr; gap: 18px; }
+      .portrait { width: 80px; height: 80px; }
+      .works-grid { grid-template-columns: 1fr; }
+    }
+
   </style>
 </head>
 <body>
 
-<!-- 1. FV -->
-<section id="fv">
+<!-- top identifier -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-name">構造設計探究室</span>
+  </div>
+  <span class="geo">JP / Hokkaido</span>
+</header>
+
+<!-- 01 Hero -->
+<section id="fv" data-screen-label="01 Hero">
+  <div class="grid-overlay" aria-hidden="true"></div>
   <div class="inner">
-    <p class="section-label">構造設計探究室 / 北海道・当麻町</p>
-    <h1 class="fv-catch">売れる流れを、<br>一緒につくる。</h1>
+    <p class="fv-eyebrow">No. 01 — Introduction</p>
+    <h1 class="fv-catch">
+      売れる流れを、<br>
+      一緒に<em class="mark">つくる</em>。
+    </h1>
     <p class="fv-sub">
-      ECやSNSをやってるのに売上に繋がらない。<br>
-      その詰まりを見つけて、構造から直します。
+      ECやSNSをやっているのに、売上に繋がらない。<br>
+      その詰まりを見つけて、構造から直していきます。
     </p>
-    <a href="#cta" class="fv-cta">まずは30分、話を聞かせてください</a>
+    <a href="#cta" class="fv-cta">
+      まずは30分、話を聞かせてください
+      <span class="arrow">→</span>
+    </a>
+    <dl class="fv-meta">
+      <div>
+        <dt>Based in</dt>
+        <dd>北海道・当麻町</dd>
+      </div>
+      <div>
+        <dt>Coverage</dt>
+        <dd>道内全域 / オンライン可</dd>
+      </div>
+    </dl>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 2. 共感 -->
-<section id="pain">
+<!-- Trusted by -->
+<section class="trust" data-screen-label="Trusted">
   <div class="inner">
-    <p class="section-label">こんなこと、思っていませんか？</p>
-    <h2 class="section-heading">いい商品・いいサービスがあるのに、<br>届いていない気がする。</h2>
+    <span class="trust-label">Worked with</span>
+    <div class="trust-row">
+      <span>ASANTE FARM</span>
+      <span>TOUMA TOWN</span>
+      <span>NOBORI</span>
+      <span>DENSUKE PAY</span>
+    </div>
+  </div>
+</section>
+
+<!-- 02 Pain -->
+<section id="pain" data-screen-label="02 Pain">
+  <div class="inner">
+    <div class="sec-mark">
+      <span class="num">02</span>
+      <span class="bar"></span>
+      <span>Problem</span>
+      <span class="jp">こんなこと、ありませんか</span>
+    </div>
+    <h2 class="h-section">いい商品・いいサービスが<br>あるのに、届いていない。</h2>
+    <p class="lede">
+      ものは間違っていない。けれど、なぜか売れない。<br>
+      原因の多くは「商品」ではなく、お客さんに届くまでの「流れ」にあります。
+    </p>
     <ul class="pain-list">
-      <li>ECやSNSを始めたのに、売上が変わらない</li>
-      <li>発信はしているのに、誰かに届いている実感がない</li>
-      <li>ホームページを作ったけど、問い合わせが来ない</li>
-      <li>何から手をつければいいか、いつも後回しになる</li>
-      <li>改善したいけど、時間も人手も足りない</li>
+      <li><span class="display-num">01</span><span>ECやSNSを始めたのに、売上が変わらない</span></li>
+      <li><span class="display-num">02</span><span>発信はしているのに、誰かに届いている実感がない</span></li>
+      <li><span class="display-num">03</span><span>ホームページを作ったけど、問い合わせが来ない</span></li>
+      <li><span class="display-num">04</span><span>何から手をつければいいか、いつも後回しになる</span></li>
+      <li><span class="display-num">05</span><span>改善したいけど、時間も人手も足りない</span></li>
     </ul>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 3. サービス -->
-<section id="service">
+<!-- Workspace photo strip -->
+<section class="scene" data-screen-label="Scene">
   <div class="inner">
-    <p class="section-label">できること</p>
-    <h2 class="section-heading">詰まりを見つけて、<br>売れる流れを整える。</h2>
-    <p class="section-body">
+    <div class="img-frame" style="aspect-ratio: 16 / 11;">
+      <span class="stamp">Photo &mdash; Studio &amp; Field</span>
+    </div>
+    <div class="scene-caption">
+      <span>fig. 01 / <b>当麻の現場から</b></span>
+      <span>北海道 上川</span>
+    </div>
+  </div>
+</section>
+
+<!-- 03 Service -->
+<section id="service" data-screen-label="03 Service">
+  <div class="inner">
+    <div class="sec-mark">
+      <span class="num">03</span>
+      <span class="bar"></span>
+      <span>Service</span>
+      <span class="jp">できること</span>
+    </div>
+    <h2 class="h-section">詰まりを見つけて、<br>売れる流れを整える。</h2>
+    <p class="lede">
       デザイン・Web・AIを道具として使いながら、<br>
-      事業の流れを構造から設計・改善します。
+      事業の流れを「構造」から設計・改善します。
     </p>
-    <div class="service-grid">
+    <div class="service-list">
       <div class="service-item">
-        <div class="service-step">STEP 01</div>
+        <div class="service-step-block">
+          <span class="service-step">01</span>
+          <span class="service-step-label">Diagnose</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/><path d="M7.5 10.5h6"/></svg>
+        </div>
         <div>
           <div class="service-name">事業導線の診断</div>
-          <div class="service-desc">
-            今の販売・発信・運営の流れを一緒に確認します。<br>
-            どこが詰まっているか、何から直すべきかを整理します。<br>
-            <small style="color:#bbb;">※まず話を聞くだけでも構いません</small>
-          </div>
+          <p class="service-desc">
+            今の販売・発信・運営の流れを一緒に確認します。どこが詰まっていて、何から直すべきかを整理してお渡しします。
+          </p>
+          <span class="note">まず話を聞くだけでも構いません</span>
         </div>
       </div>
       <div class="service-item">
-        <div class="service-step">STEP 02</div>
+        <div class="service-step-block">
+          <span class="service-step">02</span>
+          <span class="service-step-label">Design &amp; Build</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="10" height="10"/><rect x="9" y="9" width="12" height="12"/></svg>
+        </div>
         <div>
           <div class="service-name">改善の設計と実装</div>
-          <div class="service-desc">
-            導線の設計・ページ制作・発信の仕組みづくりを行います。<br>
-            作るだけでなく、売れる流れになるまで一緒に考えます。
-          </div>
+          <p class="service-desc">
+            導線の設計・ページ制作・発信の仕組みづくりまで。作るだけで終わらせず、売れる流れになるところまで一緒に考えます。
+          </p>
         </div>
       </div>
       <div class="service-item">
-        <div class="service-step">STEP 03</div>
+        <div class="service-step-block">
+          <span class="service-step">03</span>
+          <span class="service-step-label">Run with you</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg>
+        </div>
         <div>
           <div class="service-name">月次伴走サポート</div>
-          <div class="service-desc">
-            作った仕組みを動かし続けるための月次サポートです。<br>
-            データを見ながら改善を続け、売れる流れを育てます。
-          </div>
+          <p class="service-desc">
+            つくった仕組みを動かし続けるための月次サポート。データを見ながら改善を重ね、売れる流れを育てていきます。
+          </p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 4. 実績 -->
-<section id="works">
+<!-- 04 Works -->
+<section id="works" data-screen-label="04 Works">
   <div class="inner">
-    <p class="section-label">これまでの仕事</p>
-    <h2 class="section-heading">地域の事業者と、<br>一緒に動いてきました。</h2>
+    <div class="sec-mark">
+      <span class="num">04</span>
+      <span class="bar"></span>
+      <span>Works</span>
+      <span class="jp">これまでの仕事</span>
+    </div>
+    <h2 class="h-section">地域の事業者と、<br>一緒に動いてきました。</h2>
     <div class="works-grid">
       <div class="work-card">
-        <div class="work-tag">農業・EC / 進行中</div>
-        <div class="work-name">アサンテファーム</div>
-        <div class="work-desc">北海道当麻町の有機農家。サイト移行・EC導線・LINE運用の設計・改善を担当。</div>
+        <div class="work-thumb"><span class="stamp">Photo</span></div>
+        <div class="work-body">
+          <div class="work-head">
+            <span class="work-tag">EC / Farm</span>
+            <span class="work-year">2024 –</span>
+          </div>
+          <div class="work-name">アサンテファーム</div>
+          <p class="work-desc">北海道・当麻町の有機農家。サイト移行・EC導線・LINE運用の設計と改善を継続担当。</p>
+          <span class="work-status">Ongoing</span>
+        </div>
       </div>
       <div class="work-card">
-        <div class="work-tag">行政・地域 / 制作</div>
-        <div class="work-name">当麻町 地域通貨カード</div>
-        <div class="work-desc">当麻ペイ（デンスケペイ）のカードデザイン・実行委員として参加。</div>
+        <div class="work-thumb"><span class="stamp">Photo</span></div>
+        <div class="work-body">
+          <div class="work-head">
+            <span class="work-tag">Civic</span>
+            <span class="work-year">2024</span>
+          </div>
+          <div class="work-name">当麻ペイ</div>
+          <p class="work-desc">当麻町・地域通貨「デンスケペイ」のカードデザイン。実行委員として企画から参加。</p>
+          <span class="work-status done">Completed</span>
+        </div>
       </div>
       <div class="work-card">
-        <div class="work-tag">農業 / 制作</div>
-        <div class="work-name">のぼりの城</div>
-        <div class="work-desc">北海道当麻町の農家。フライヤー制作。</div>
+        <div class="work-thumb"><span class="stamp">Photo</span></div>
+        <div class="work-body">
+          <div class="work-head">
+            <span class="work-tag">Print / Farm</span>
+            <span class="work-year">2023</span>
+          </div>
+          <div class="work-name">のぼりの城</div>
+          <p class="work-desc">北海道・当麻町の農家。直販向けのフライヤー制作・印刷ディレクション。</p>
+          <span class="work-status done">Completed</span>
+        </div>
       </div>
       <div class="work-card">
-        <div class="work-tag">行政 / Web制作</div>
-        <div class="work-name">当麻町ホームページ</div>
-        <div class="work-desc">当麻町公式サイト制作への関与。</div>
+        <div class="work-thumb"><span class="stamp">Photo</span></div>
+        <div class="work-body">
+          <div class="work-head">
+            <span class="work-tag">Civic / Web</span>
+            <span class="work-year">2023</span>
+          </div>
+          <div class="work-name">当麻町 公式サイト</div>
+          <p class="work-desc">当麻町ホームページ制作に協力。情報設計と運用面の整理を担当。</p>
+          <span class="work-status done">Completed</span>
+        </div>
       </div>
     </div>
+    <p class="works-note">— Other ongoing local projects —</p>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 5. 自己紹介 -->
-<section id="about">
+<!-- 05 About -->
+<section id="about" data-screen-label="05 About">
   <div class="inner">
-    <p class="section-label">はじめまして</p>
-    <h2 class="section-heading">地元で、一人でやっています。</h2>
-    <div class="about-inner">
-      <img src="img/logo-a2c.png" alt="構造設計探究室 ロゴ" class="about-photo">
+    <div class="sec-mark">
+      <span class="num">05</span>
+      <span class="bar"></span>
+      <span>About</span>
+      <span class="jp">はじめまして</span>
+    </div>
+    <h2 class="h-section">地元で、一人で<br>やっています。</h2>
+    <div class="about-top">
+      <div class="portrait" aria-label="ミズモト アツシ"><span class="stamp">Portrait</span></div>
       <div>
         <div class="about-name">ミズモト アツシ</div>
-        <div class="about-location">北海道・当麻町在住</div>
-        <p class="about-text">
-          デザインとWebと、最近はAIも使いながら、<br>
-          地域の事業者が「売れる流れ」を持てるよう一緒に動いています。<br><br>
-          派手なことは言いません。<br>
-          現場で一緒に考えて、動いて、直していきます。
-        </p>
+        <div class="about-romaji">Atsushi Mizumoto</div>
+        <div class="about-location">北海道上川郡 当麻町 在住</div>
+      </div>
+    </div>
+    <div class="about-text">
+      <p>
+        デザインとWeb、最近はAIも使いながら、
+        地域の事業者が「売れる流れ」を持てるよう
+        一緒に動いています。
+      </p>
+      <p>
+        派手なことは言いません。<br>
+        現場で一緒に考えて、つくって、直していく。<br>
+        そのくり返しを大切にしています。
+      </p>
+    </div>
+    <div class="about-sig">— Mizumoto</div>
+  </div>
+</section>
+
+<!-- Voice / testimonial — 実際の声に差し替えてください -->
+<section id="voice" data-screen-label="Voice">
+  <div class="inner">
+    <div class="sec-mark">
+      <span class="num">—</span>
+      <span class="bar"></span>
+      <span>Voice</span>
+      <span class="jp">お客様の声</span>
+    </div>
+    <div class="voice-card">
+      <p class="voice-quote">
+        売上が伸びない理由を、自分たちでは言葉にできなかった。<br>
+        ミズモトさんと話して、初めて何を直せばいいか整理がついた気がします。
+      </p>
+      <div class="voice-attr">
+        <div class="voice-avatar"></div>
+        <div>
+          <div class="voice-meta-name">アサンテファーム 様</div>
+          <div class="voice-meta-role">北海道・当麻町 / 有機農家</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 6. 進め方 -->
-<section id="flow">
+<!-- 06 Flow -->
+<section id="flow" data-screen-label="06 Flow">
   <div class="inner">
-    <p class="section-label">ご相談からの流れ</p>
-    <h2 class="section-heading">まず話を聞くところから。</h2>
+    <div class="sec-mark">
+      <span class="num">06</span>
+      <span class="bar"></span>
+      <span>Process</span>
+      <span class="jp">ご相談からの流れ</span>
+    </div>
+    <h2 class="h-section">まず、話を聞く<br>ところから。</h2>
     <ol class="flow-list">
       <li class="flow-item">
-        <div class="flow-num">01</div>
+        <span class="flow-num">01</span>
         <div>
-          <div class="flow-title">まず30分、話を聞かせてください</div>
-          <div class="flow-desc">電話でも対面でも。何が詰まっているか、一緒に確認します。無料です。</div>
+          <div class="flow-title">30分、話を聞かせてください</div>
+          <p class="flow-desc">電話・LINE・対面、どれでも。何が詰まっているか、一緒に確認します。<em>初回相談は無料</em>です。</p>
         </div>
       </li>
       <li class="flow-item">
-        <div class="flow-num">02</div>
+        <span class="flow-num">02</span>
         <div>
           <div class="flow-title">詰まりを整理して、提案します</div>
-          <div class="flow-desc">何が問題で、何から直せばいいか。優先順位を整理してお伝えします。</div>
+          <p class="flow-desc">何が問題で、何から直せばいいか。優先順位とお見積もりを整理してお伝えします。</p>
         </div>
       </li>
       <li class="flow-item">
-        <div class="flow-num">03</div>
+        <span class="flow-num">03</span>
         <div>
           <div class="flow-title">設計して、一緒につくります</div>
-          <div class="flow-desc">導線・ページ・発信の仕組みを設計・制作します。</div>
+          <p class="flow-desc">導線・ページ・発信の仕組みを設計・制作。途中で一緒に確認しながら進めます。</p>
         </div>
       </li>
       <li class="flow-item">
-        <div class="flow-num">04</div>
+        <span class="flow-num">04</span>
         <div>
           <div class="flow-title">動かし続けます</div>
-          <div class="flow-desc">公開して終わりではなく、データを見ながら改善を続けます。</div>
+          <p class="flow-desc">公開して終わりではなく、データを見ながら改善を続けます。月次でのご一緒も可能です。</p>
         </div>
       </li>
     </ol>
-    <p style="margin-top:20px; font-size:13px; color:var(--light);">※ 料金はご相談時に直接お伝えします。</p>
+    <div class="flow-meta">
+      <strong>料金について</strong>ご相談内容にあわせて個別にお見積もり。農家・小規模事業者・地域の店舗事業者の方には、規模に合わせたご提案をしています。
+    </div>
   </div>
 </section>
 
-<hr class="rule">
-
-<!-- 7. CTA -->
-<section id="cta">
+<!-- 07 CTA -->
+<section id="cta" data-screen-label="07 Contact">
   <div class="inner">
-    <p class="section-label" style="color:rgba(255,255,255,0.4);">Contact</p>
+    <div class="sec-mark">
+      <span class="num">07</span>
+      <span class="bar"></span>
+      <span>Contact</span>
+      <span class="jp">ご相談</span>
+    </div>
     <h2 class="cta-heading">まずは30分、<br>話を聞かせてください。</h2>
     <p class="cta-sub">
       売上のこと、発信のこと、何から手をつけるか。<br>
       一緒に確認するだけでも、詰まりが見えることがあります。
     </p>
     <div class="cta-buttons">
-      <a href="tel:080-3814-4002" class="btn-primary">電話で相談する</a>
-      <a href="https://line.me/ti/p/~a2c-mizumoto" class="btn-secondary">LINEで相談する</a>
+      <a href="tel:080-3814-4002" class="btn btn-primary">
+        <span class="label-row">
+          <span class="label-small">Tel — 電話で相談する</span>
+          <span class="label-main">080 — 3814 — 4002</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+      <a href="https://line.me/ti/p/~a2c-mizumoto" class="btn btn-secondary">
+        <span class="label-row">
+          <span class="label-small">Line — メッセージで相談する</span>
+          <span class="label-main">@a2c-mizumoto</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
     </div>
     <p class="cta-note">
-      北海道・当麻町 / 対応エリア：旭川市・上川地方中心
+      Area — 北海道全域 / Online OK<br>
+      Studio — 北海道上川郡当麻町
     </p>
   </div>
 </section>
 
+<!-- Footer -->
 <footer>
-  <p>© 構造設計探究室 / ミズモト アツシ</p>
+  <dl class="foot-grid">
+    <div class="foot-item">
+      <dt>Studio</dt>
+      <dd>構造設計探究室</dd>
+    </div>
+    <div class="foot-item">
+      <dt>Founder</dt>
+      <dd>ミズモト アツシ</dd>
+    </div>
+    <div class="foot-item">
+      <dt>Based in</dt>
+      <dd>北海道上川郡当麻町</dd>
+    </div>
+    <div class="foot-item">
+      <dt>Service</dt>
+      <dd>事業導線の設計・改善 / Web・印刷 / 月次伴走</dd>
+    </div>
+  </dl>
+  <div class="foot-copy">
+    <span>© 構造設計探究室</span>
+    <span>2026 / v.3</span>
+  </div>
 </footer>
 
 </body>
